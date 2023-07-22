@@ -1,0 +1,16 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://d1m7hrhxuyxn5"]
+
+[ext_resource type="FontFile" uid="uid://danm457pofgw2" path="res://Assets/Fonts/Kenney Future Narrow.ttf" id="1_sx856"]
+
+[resource]
+Button/font_sizes/font_size = 17
+Button/fonts/font = ExtResource("1_sx856")
+Label/font_sizes/font_size = 17
+Label/fonts/font = ExtResource("1_sx856")
+LineEdit/fonts/font = ExtResource("1_sx856")
+ProgressBar/fonts/font = ExtResource("1_sx856")
+TabBar/fonts/font = ExtResource("1_sx856")
+TabContainer/fonts/font = ExtResource("1_sx856")
+TextEdit/fonts/font = ExtResource("1_sx856")
+Tree/fonts/font = ExtResource("1_sx856")
+Tree/fonts/title_button_font = ExtResource("1_sx856")

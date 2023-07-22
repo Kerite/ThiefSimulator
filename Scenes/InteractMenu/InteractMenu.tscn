@@ -1,0 +1,44 @@
+[gd_scene load_steps=4 format=3 uid="uid://bu5b0xt6lgpa8"]
+
+[ext_resource type="Script" path="res://Scenes/InteractMenu/InteractMenu.cs" id="1_kxeca"]
+[ext_resource type="Texture2D" uid="uid://deweyxsf71kfw" path="res://Assets/Icons/Kick.png" id="2_hh8cj"]
+[ext_resource type="Texture2D" uid="uid://beyqy071jquqs" path="res://Assets/Icons/Peek.png" id="2_skjtr"]
+
+[node name="InteractMenu" type="Node2D"]
+script = ExtResource("1_kxeca")
+
+[node name="Control" type="MarginContainer" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -32.0
+offset_top = -40.0
+offset_right = 32.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 8
+theme_override_constants/margin_bottom = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Control"]
+layout_mode = 2
+
+[node name="Steel" type="Button" parent="Control/HBoxContainer"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_hh8cj")
+expand_icon = true
+
+[node name="Peek" type="Button" parent="Control/HBoxContainer"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+icon = ExtResource("2_skjtr")
+expand_icon = true

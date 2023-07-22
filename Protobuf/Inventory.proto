@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message Inventory {
+    uint32 keys = 1;
+    uint32 moneys = 2;
+}

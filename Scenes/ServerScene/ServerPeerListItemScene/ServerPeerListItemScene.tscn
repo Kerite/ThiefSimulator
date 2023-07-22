@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://wkdjw2rwwm6w"]
+
+[ext_resource type="Script" path="res://Scenes/ServerScene/ServerPeerListItemScene/ServerPeerListItemScene.cs" id="1_50tgf"]
+
+[node name="ServerPeerListItemScene" type="HBoxContainer"]
+custom_minimum_size = Vector2(300, 0)
+offset_right = 300.0
+offset_bottom = 23.0
+script = ExtResource("1_50tgf")
+
+[node name="PeerId" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.662745, 0, 0, 1)
+
+[node name="PlayerId" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.917647, 0, 1)
+
+[node name="Operation" type="Label" parent="."]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0.392157, 0.392157, 1)

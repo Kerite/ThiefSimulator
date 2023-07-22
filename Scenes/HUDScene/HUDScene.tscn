@@ -1,0 +1,202 @@
+[gd_scene load_steps=6 format=3 uid="uid://bcd6dmiy3bf38"]
+
+[ext_resource type="Script" path="res://Scenes/HUDScene/HudScene.cs" id="1_cbta8"]
+[ext_resource type="Texture2D" uid="uid://r412sgcg4is7" path="res://Assets/Icons/DoorKey.png" id="2_vujvd"]
+[ext_resource type="Texture2D" uid="uid://bwjsbcu01d41a" path="res://Assets/Images/blue_button00.png" id="3_ak8x4"]
+[ext_resource type="Texture2D" uid="uid://b7i1pulouqo2w" path="res://Assets/Images/blue_button01.png" id="4_rnfqj"]
+[ext_resource type="Theme" uid="uid://y8iqjg48675m" path="res://Themes/MainMenuTheme.tres" id="5_mgwr4"]
+
+[node name="HUDScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cbta8")
+
+[node name="TopContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 67.0
+grow_horizontal = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="TopPanel" type="PanelContainer" parent="TopContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="TopContainer/TopPanel"]
+custom_minimum_size = Vector2(0, 55)
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TextureRect" type="TextureRect" parent="TopContainer/TopPanel/HBoxContainer"]
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("2_vujvd")
+expand_mode = 1
+
+[node name="KeysLabel" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "x"
+
+[node name="Keys" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="Space1" type="Control" parent="TopContainer/TopPanel/HBoxContainer"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="MoneyLabel" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Money:"
+
+[node name="Moneys" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "0"
+
+[node name="Space2" type="Control" parent="TopContainer/TopPanel/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="StayAtHomeButton" type="TextureButton" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 4
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("3_ak8x4")
+texture_pressed = ExtResource("4_rnfqj")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="TopContainer/TopPanel/HBoxContainer/StayAtHomeButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -62.0
+offset_top = -13.0
+offset_right = 62.0
+offset_bottom = 13.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("5_mgwr4")
+theme_override_font_sizes/font_size = 15
+text = "Stay at home"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Space3" type="Control" parent="TopContainer/TopPanel/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="RoundLabel" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Round:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Round" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Space4" type="Control" parent="TopContainer/TopPanel/HBoxContainer"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+
+[node name="OperationLabel" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Operation:"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Operation" type="Label" parent="TopContainer/TopPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+
+[node name="RightContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -75.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_top = 67
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="RightPanel" type="PanelContainer" parent="RightContainer"]
+layout_mode = 2
+
+[node name="ScrollContainer" type="ScrollContainer" parent="RightContainer/RightPanel"]
+custom_minimum_size = Vector2(75, 0)
+layout_mode = 2
+
+[node name="InventoryUI" type="VBoxContainer" parent="RightContainer/RightPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="MessageContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -332.0
+offset_right = 350.0
+grow_vertical = 0
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="ShowMessageButton" type="Button" parent="MessageContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+mouse_default_cursor_shape = 2
+text = "Show"
+
+[node name="MessagePanel" type="PanelContainer" parent="MessageContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MessageContainer/MessagePanel"]
+layout_mode = 2
+
+[node name="MessageHistory" type="RichTextLabel" parent="MessageContainer/MessagePanel/VBoxContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(350, 300)
+layout_mode = 2
+bbcode_enabled = true
+scroll_following = true
+shortcut_keys_enabled = false
+threaded = true
+
+[node name="LockBox" type="CheckButton" parent="MessageContainer/MessagePanel/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+mouse_default_cursor_shape = 2
+theme_override_font_sizes/font_size = 14
+button_pressed = true
+text = "Lock"
+alignment = 2
+icon_alignment = 2
+
+[connection signal="pressed" from="TopContainer/TopPanel/HBoxContainer/StayAtHomeButton" to="." method="_On_StayAtHomeButton_Pressed"]
+[connection signal="pressed" from="MessageContainer/ShowMessageButton" to="." method="StartHideMessage"]
+[connection signal="mouse_entered" from="MessageContainer/MessagePanel/VBoxContainer/MessageHistory" to="." method="_On_MessageHistoryContainer_MouseEntered"]
+[connection signal="mouse_exited" from="MessageContainer/MessagePanel/VBoxContainer/MessageHistory" to="." method="_On_MessageHistoryContainer_MouseExited"]
+[connection signal="toggled" from="MessageContainer/MessagePanel/VBoxContainer/LockBox" to="." method="_On_LockMessageHistoryButton_Toggled"]

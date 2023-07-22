@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message House {
+    string owner = 1;
+    uint32 house_money = 2;
+}

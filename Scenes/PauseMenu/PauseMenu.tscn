@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://dcxr45sl6nfkj"]
+
+[ext_resource type="Script" path="res://Scenes/PauseMenu/PauseMenu.cs" id="1_la58v"]
+[ext_resource type="Theme" uid="uid://d1m7hrhxuyxn5" path="res://Themes/NormalTheme.tres" id="1_wf3ks"]
+
+[node name="PauseMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_la58v")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.117647, 0.270588, 0.294118, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 40
+
+[node name="Title" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "Game Paused (LIE)"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Space" type="Control" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme = ExtResource("1_wf3ks")
+text = "Resume"
+
+[node name="DisconnectButton" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(180, 60)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+theme = ExtResource("1_wf3ks")
+text = "Disconnect"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/ResumeButton" to="." method="_On_ResumeButton_Pressed"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/DisconnectButton" to="." method="_On_DisconnectButton_Pressed"]

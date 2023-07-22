@@ -1,0 +1,181 @@
+[gd_scene load_steps=7 format=3 uid="uid://c12cn42x8voji"]
+
+[ext_resource type="Script" path="res://Scenes/ServerScene/ServerScene.cs" id="1_d4hgi"]
+[ext_resource type="Theme" uid="uid://y8iqjg48675m" path="res://Themes/MainMenuTheme.tres" id="2_4m5u0"]
+[ext_resource type="Theme" uid="uid://d1m7hrhxuyxn5" path="res://Themes/NormalTheme.tres" id="2_u4seb"]
+[ext_resource type="Texture2D" uid="uid://bwjsbcu01d41a" path="res://Assets/Images/blue_button00.png" id="3_0r45p"]
+[ext_resource type="Theme" uid="uid://bqqwi7q2iuvne" path="res://Themes/GridLayoutTheme.tres" id="3_rbtfv"]
+[ext_resource type="Texture2D" uid="uid://b7i1pulouqo2w" path="res://Assets/Images/blue_button01.png" id="4_e5yr7"]
+
+[node name="ServerScene" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_u4seb")
+script = ExtResource("1_d4hgi")
+
+[node name="LeftPanel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="LeftPanel"]
+custom_minimum_size = Vector2(850, 0)
+layout_mode = 2
+
+[node name="PeerListContainer" type="ScrollContainer" parent="LeftPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="PeerList" type="VBoxContainer" parent="LeftPanel/VBoxContainer/PeerListContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+theme = ExtResource("2_u4seb")
+
+[node name="OperationHistoryScroll" type="ScrollContainer" parent="LeftPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="OperationHistory" type="GridContainer" parent="LeftPanel/VBoxContainer/OperationHistoryScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme = ExtResource("3_rbtfv")
+columns = 5
+
+[node name="RoundHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+layout_mode = 2
+text = "Round"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PeerHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+layout_mode = 2
+text = "Peer Id"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerIdHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+layout_mode = 2
+text = "Player Id"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TimeHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+layout_mode = 2
+text = "Time"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="OperationHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+layout_mode = 2
+text = "Operation"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -250.0
+offset_bottom = 104.0
+grow_horizontal = 0
+theme_override_constants/separation = 20
+
+[node name="TextureButton" type="TextureButton" parent="VBoxContainer"]
+custom_minimum_size = Vector2(280, 100)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("3_0r45p")
+texture_pressed = ExtResource("4_e5yr7")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="VBoxContainer/TextureButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_4m5u0")
+text = "Next Round"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FinishGameButton" type="TextureButton" parent="VBoxContainer"]
+custom_minimum_size = Vector2(250, 100)
+layout_mode = 2
+mouse_default_cursor_shape = 2
+texture_normal = ExtResource("3_0r45p")
+texture_pressed = ExtResource("4_e5yr7")
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="VBoxContainer/FinishGameButton"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_4m5u0")
+text = "Finish Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="ContainerCurrentRound" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -75.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Label" type="Label" parent="ContainerCurrentRound"]
+custom_minimum_size = Vector2(150, 75)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "CurrentRound:"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="CurrentRound" type="Label" parent="ContainerCurrentRound"]
+custom_minimum_size = Vector2(70, 75)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FileDialog" type="FileDialog" parent="."]
+disable_3d = true
+initial_position = 2
+size = Vector2i(1000, 600)
+unresizable = true
+min_size = Vector2i(1000, 600)
+max_size = Vector2i(1000, 600)
+theme = ExtResource("2_u4seb")
+ok_button_text = "Save"
+access = 2
+filters = PackedStringArray("*.csv ; Comma-Separated Values")
+show_hidden_files = true
+
+[connection signal="pressed" from="VBoxContainer/TextureButton" to="." method="_On_FinishRoundButton_Pressed"]
+[connection signal="pressed" from="VBoxContainer/FinishGameButton" to="." method="_On_FinishGameButton_Pressed"]
+[connection signal="file_selected" from="FileDialog" to="." method="Save"]

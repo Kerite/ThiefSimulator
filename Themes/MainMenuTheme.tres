@@ -1,0 +1,12 @@
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://y8iqjg48675m"]
+
+[ext_resource type="FontFile" uid="uid://dfe3r366bq57w" path="res://Assets/Fonts/Kenney Blocks.ttf" id="1_ljufx"]
+[ext_resource type="Texture2D" uid="uid://bwjsbcu01d41a" path="res://Assets/Images/blue_button00.png" id="2_rdv1o"]
+
+[resource]
+default_font = ExtResource("1_ljufx")
+default_font_size = 30
+Label/colors/font_shadow_color = Color(0, 0, 0, 0.745098)
+Label/font_sizes/font_size = 30
+Label/fonts/font = ExtResource("1_ljufx")
+TextureButton/icons/texture_normal = ExtResource("2_rdv1o")
