@@ -221,6 +221,8 @@ public partial class Server : Node
         ManualSyncInventory(peerId, playerId);
         ManualSyncLevel(peerId);
         EmitSignal(SignalName.UserLoginOrLogout, peerId, playerId, true);
+        SendMessage(peerId, "[color=green]Login Success[/color]");
+        SendMessage(peerId, $"Welcome, [color=green]{playerId}[/color]");
     }
 
     /// <summary>
