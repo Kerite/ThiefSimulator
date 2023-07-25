@@ -17,86 +17,95 @@ grow_vertical = 2
 theme = ExtResource("2_u4seb")
 script = ExtResource("1_d4hgi")
 
-[node name="LeftPanel" type="PanelContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LeftPanel"]
+[node name="LeftPanel" type="PanelContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/LeftPanel"]
 custom_minimum_size = Vector2(850, 0)
 layout_mode = 2
 
-[node name="PeerListContainer" type="ScrollContainer" parent="LeftPanel/VBoxContainer"]
+[node name="PeerListContainer" type="ScrollContainer" parent="MarginContainer/LeftPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 size_flags_vertical = 0
 
-[node name="PeerList" type="VBoxContainer" parent="LeftPanel/VBoxContainer/PeerListContainer"]
+[node name="PeerList" type="VBoxContainer" parent="MarginContainer/LeftPanel/VBoxContainer/PeerListContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 theme = ExtResource("2_u4seb")
 
-[node name="OperationHistoryScroll" type="ScrollContainer" parent="LeftPanel/VBoxContainer"]
+[node name="OperationHistoryScroll" type="ScrollContainer" parent="MarginContainer/LeftPanel/VBoxContainer"]
+unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="OperationHistory" type="GridContainer" parent="LeftPanel/VBoxContainer/OperationHistoryScroll"]
+[node name="OperationHistory" type="GridContainer" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme = ExtResource("3_rbtfv")
 columns = 5
 
-[node name="RoundHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+[node name="RoundHeader" type="Label" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
 layout_mode = 2
 text = "Round"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PeerHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+[node name="PeerHeader" type="Label" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
 layout_mode = 2
 text = "Peer Id"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="PlayerIdHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+[node name="PlayerIdHeader" type="Label" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
 layout_mode = 2
 text = "Player Id"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TimeHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+[node name="TimeHeader" type="Label" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
 layout_mode = 2
 text = "Time"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="OperationHeader" type="Label" parent="LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
+[node name="OperationHeader" type="Label" parent="MarginContainer/LeftPanel/VBoxContainer/OperationHistoryScroll/OperationHistory"]
 layout_mode = 2
 text = "Operation"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ExportButton" type="Button" parent="LeftPanel/VBoxContainer"]
+[node name="ExportButton" type="Button" parent="MarginContainer/LeftPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_horizontal = 8
+size_flags_vertical = 8
 mouse_default_cursor_shape = 2
 theme_override_font_sizes/font_size = 20
 text = "Export"
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -250.0
-offset_bottom = 104.0
-grow_horizontal = 0
+[node name="ServerOperations" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
 theme_override_constants/separation = 20
 
-[node name="TextureButton" type="TextureButton" parent="VBoxContainer"]
+[node name="NextRoundButton" type="TextureButton" parent="MarginContainer/ServerOperations"]
 custom_minimum_size = Vector2(280, 100)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -104,7 +113,7 @@ texture_normal = ExtResource("3_0r45p")
 texture_pressed = ExtResource("4_e5yr7")
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="VBoxContainer/TextureButton"]
+[node name="Label" type="Label" parent="MarginContainer/ServerOperations/NextRoundButton"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -116,7 +125,7 @@ text = "Next Round"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="FinishGameButton" type="TextureButton" parent="VBoxContainer"]
+[node name="FinishGameButton" type="TextureButton" parent="MarginContainer/ServerOperations"]
 custom_minimum_size = Vector2(250, 100)
 layout_mode = 2
 mouse_default_cursor_shape = 2
@@ -124,7 +133,7 @@ texture_normal = ExtResource("3_0r45p")
 texture_pressed = ExtResource("4_e5yr7")
 stretch_mode = 0
 
-[node name="Label" type="Label" parent="VBoxContainer/FinishGameButton"]
+[node name="Label" type="Label" parent="MarginContainer/ServerOperations/FinishGameButton"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -136,25 +145,12 @@ text = "Finish Game"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="ContainerCurrentRound" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
 
-[node name="ContainerCurrentRound" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -75.0
-grow_horizontal = 0
-grow_vertical = 0
-
-[node name="Label" type="Label" parent="ContainerCurrentRound"]
+[node name="Label" type="Label" parent="MarginContainer/ContainerCurrentRound"]
 custom_minimum_size = Vector2(150, 75)
 layout_mode = 2
 theme_override_font_sizes/font_size = 20
@@ -162,7 +158,8 @@ text = "CurrentRound:"
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="CurrentRound" type="Label" parent="ContainerCurrentRound"]
+[node name="CurrentRoundLabel" type="Label" parent="MarginContainer/ContainerCurrentRound"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(70, 75)
 layout_mode = 2
 theme_override_font_sizes/font_size = 40
@@ -183,7 +180,7 @@ access = 2
 filters = PackedStringArray("*.csv ; Comma-Separated Values")
 show_hidden_files = true
 
-[connection signal="pressed" from="LeftPanel/VBoxContainer/ExportButton" to="." method="_On_ExportButton_Pressed"]
-[connection signal="pressed" from="VBoxContainer/TextureButton" to="." method="_On_FinishRoundButton_Pressed"]
-[connection signal="pressed" from="VBoxContainer/FinishGameButton" to="." method="_On_FinishGameButton_Pressed"]
+[connection signal="pressed" from="MarginContainer/LeftPanel/VBoxContainer/ExportButton" to="." method="_On_ExportButton_Pressed"]
+[connection signal="pressed" from="MarginContainer/ServerOperations/NextRoundButton" to="." method="_On_FinishRoundButton_Pressed"]
+[connection signal="pressed" from="MarginContainer/ServerOperations/FinishGameButton" to="." method="_On_FinishGameButton_Pressed"]
 [connection signal="file_selected" from="FileDialog" to="." method="Save"]

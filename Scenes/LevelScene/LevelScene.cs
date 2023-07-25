@@ -10,11 +10,11 @@ public partial class LevelScene : Node2D
     public const string ScenePath = "res://Scenes/LevelScene/LevelScene.tscn";
     public const int MoveSpeed = 1000;
 
-    private Camera2D _camera;
-    private Node2D _cameraCenter;
-    private WorldMap _groundTileMap;
-    private InteractMenu.InteractMenu _interactMenu;
-    private Server _server;
+    private Camera2D? _camera;
+    private Node2D? _cameraCenter;
+    private WorldMap? _groundTileMap;
+    private InteractMenu.InteractMenu? _interactMenu;
+    private Server? _server;
 
     private Vector2I? _houseCoord;
 
@@ -22,11 +22,13 @@ public partial class LevelScene : Node2D
     {
         // Update Camera Position
         var vec = Input.GetVector("left", "right", "up", "down");
-        var newPosition = _cameraCenter.GlobalPosition + vec * MoveSpeed * (float)delta;
-        var viewport = GetViewportRect().Size;
+        if (vec is { X: 0, Y: 0 }) return;
+        
+        var newPosition = _cameraCenter!.GlobalPosition + vec * MoveSpeed * (float)delta;
         newPosition.X = Math.Clamp(newPosition.X, 0, 1000);
         newPosition.Y = Math.Clamp(newPosition.Y, 0, 500);
         _cameraCenter.GlobalPosition = newPosition;
+        _interactMenu!.Visible = false;
     }
 
     public override void _Ready()
@@ -50,21 +52,20 @@ public partial class LevelScene : Node2D
         }
         else
         {
-            _interactMenu.Visible = false;
+            _interactMenu!.Visible = false;
             _houseCoord = null;
         }
     }
 
     private void _On_InteractMenu_Interacted(InteractMenu.InteractMenu.EnumMenu menu)
     {
-        var interactedMenu = (InteractMenu.InteractMenu.EnumMenu)menu;
-        switch (interactedMenu)
+        switch (menu)
         {
             case InteractMenu.InteractMenu.EnumMenu.Steel:
             {
                 if (_houseCoord.HasValue)
                 {
-                    _server.HouseOperation((int)EnumPlayerOperation.Steel, _server.GetHouseId(_houseCoord.Value));
+                    _server!.HouseOperation((int)EnumPlayerOperation.Steel, _server.GetHouseId(_houseCoord.Value));
                 }
 
                 break;
@@ -73,25 +74,27 @@ public partial class LevelScene : Node2D
             {
                 if (_houseCoord.HasValue)
                 {
-                    _server.HouseOperation((int)EnumPlayerOperation.Peek, _server.GetHouseId(_houseCoord.Value));
+                    _server!.HouseOperation((int)EnumPlayerOperation.Peek, _server.GetHouseId(_houseCoord.Value));
                 }
 
                 break;
             }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(menu), menu, null);
         }
     }
 
     public void ShowInteractMenu(Vector2I tileCoord)
     {
-        var position = _groundTileMap.MapToLocal(tileCoord);
-        _interactMenu.Visible = true;
-        _interactMenu.Position = position;
+        var position = _groundTileMap!.MapToLocal(tileCoord);
+        _interactMenu!.Visible = true;
+        _interactMenu!.Position = position;
         // GD.Print($"[Client] Moved interact menu to {position}");
     }
 
     public void _On_Server_Connected()
     {
-        GetWindow().Title = $"[{_server.PlayerId}] @ {_server.ServerIp}:{_server.ServerPort}";
+        GetWindow().Title = $"[{_server!.ClientData.PlayerId}] @ {_server.ServerIp}:{_server.ServerPort}";
     }
 
     public void _On_Server_Disconnected()

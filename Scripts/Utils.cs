@@ -1,19 +1,21 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Godot;
 
 namespace NewDemo.Scripts;
 
 public static class Utils
 {
-    public const int BasicRent = 100;
-    public const int KRent = 100;
+    public const uint BasicRent = 100;
+    public const uint KRent = 100;
 
     /// <summary>
     /// 计算当前回合的租金
     /// </summary>
     /// <param name="round">回合数</param>
     /// <returns></returns>
-    public static int CalculateRent(int round)
+    public static uint CalculateRent(uint round)
     {
         return BasicRent + (round - 1) * KRent;
     }
@@ -45,5 +47,16 @@ public static class Utils
         var x = index >> 32;
         var y = index & 0xFFFFFFFF;
         return new Vector2I((int)x, (int)y);
+    }
+
+    public static List<TItem> GetOrCreate<TKey, TItem>(this Dictionary<TKey, List<TItem>> dictionary, TKey key)
+    {
+        if (dictionary.TryGetValue(key, out var list))
+            return list;
+
+        list = new List<TItem>();
+        dictionary[key] = list;
+
+        return list;
     }
 }

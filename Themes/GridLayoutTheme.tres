@@ -12,4 +12,5 @@ expand_margin_right = 2.0
 expand_margin_bottom = 2.0
 
 [resource]
+Label/font_sizes/font_size = 14
 Label/styles/normal = SubResource("StyleBoxFlat_j7kj2")

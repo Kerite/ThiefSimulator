@@ -7,9 +7,9 @@ public partial class ConnectScene : Control
 {
     public const string ScenePath = "res://Scenes/ConnectScene/ConnectScene.tscn";
 
-    private LineEdit _ip;
-    private LineEdit _port;
-    private Server _server;
+    private LineEdit? _ip;
+    private LineEdit? _port;
+    private Server? _server;
 
     public override void _Ready()
     {
@@ -18,16 +18,16 @@ public partial class ConnectScene : Control
         _server = GetNode<Server>("/root/Server");
         _server.ConnectedToServer += (ip, port) =>
         {
-            _server.Login(_server.PlayerId, "keep this empty is ok for now");
+            _server.Login(_server.ClientData.PlayerId, "keep this empty is ok for now");
         };
     }
 
     public void Connect()
     {
-        var ip = _ip.Text;
-        var port = int.Parse(_port.Text);
+        var ip = _ip!.Text;
+        var port = int.Parse(_port!.Text);
         GetWindow().Title = "Connecting...";
-        _server.Connect(ip, port);
+        _server!.Connect(ip, port);
         GetTree().ChangeSceneToFile(LevelScene.LevelScene.ScenePath);
     }
 }

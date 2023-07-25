@@ -2,7 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <Nullable>enable</Nullable>
     <RootNamespace>NewDemo</RootNamespace>
+    <UserSecretsId>16d33740-3a9b-48f3-af09-d8564d15e8dc</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.23.4" />

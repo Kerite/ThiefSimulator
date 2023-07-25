@@ -7,7 +7,6 @@ using NewDemo.Scenes.Singletons;
 
 namespace NewDemo.Scenes.HUDScene;
 
-#nullable enable
 public partial class HudScene : Control
 {
     private Server? _server;
@@ -16,6 +15,7 @@ public partial class HudScene : Control
     private Label? _money;
     private Label? _round;
     private Label? _operation;
+    private Label? _peekChance;
     private PanelContainer? _messagePanel;
     private RichTextLabel? _messageHistory;
     private Button? _showMessageButton;
@@ -31,6 +31,7 @@ public partial class HudScene : Control
         _keys = GetNode<Label>("TopContainer/TopPanel/HBoxContainer/Keys");
         _money = GetNode<Label>("TopContainer/TopPanel/HBoxContainer/Moneys");
         _round = GetNode<Label>("TopContainer/TopPanel/HBoxContainer/Round");
+        _peekChance = GetNode<Label>("TopContainer/TopPanel/HBoxContainer/PeekChance");
         _showMessageButton = GetNode<Button>("MessageContainer/ShowMessageButton");
         _operation = GetNode<Label>("TopContainer/TopPanel/HBoxContainer/Operation");
         _messagePanel = GetNode<PanelContainer>("MessageContainer/MessagePanel");
@@ -41,6 +42,7 @@ public partial class HudScene : Control
         {
             _keys.Text = data.Keys.ToString();
             _money.Text = data.Moneys.ToString();
+            _peekChance.Text = data.RemainedPeek.ToString();
         };
         _server.ReceivedLevelData += data => { _round.Text = data.Round.ToString(); };
         _server.RoundChanged += _On_Server_RoundChanged;
@@ -69,12 +71,36 @@ public partial class HudScene : Control
 
     public void SyncInventory()
     {
-        _server!.SyncInventoryRequest();
+        _server!.RpcSyncInventoryDataRequest();
     }
+
+    private void StartHideMessage()
+    {
+        async Task HideMessageAsync(CancellationToken token)
+        {
+            await Task.Delay(3000, token);
+            _messagePanel!.Visible = false;
+            _showMessageButton!.Visible = true;
+        }
+
+        _messagePanel!.Visible = true;
+        _showMessageButton!.Visible = false;
+        _cts?.Cancel();
+
+        if (_locked) return;
+        _cts = new CancellationTokenSource();
+        _ = HideMessageAsync(_cts.Token);
+    }
+
 
     public void _On_StayAtHomeButton_Pressed()
     {
         _server!.HouseOperation((int)EnumPlayerOperation.StayAtHome);
+    }
+
+    public void _On_TransferMoneyButton_Pressed()
+    {
+        GetNode<TransferGoldScene.TransferGoldScene>("TransferGoldScene").Visible = true;
     }
 
     public void _On_MessageHistoryContainer_MouseEntered()
@@ -96,23 +122,4 @@ public partial class HudScene : Control
             _cts?.Cancel();
         }
     }
-
-    private void StartHideMessage()
-    {
-        async Task HideMessageAsync(CancellationToken token)
-        {
-            await Task.Delay(3000, token);
-            _messagePanel!.Visible = false;
-            _showMessageButton!.Visible = true;
-        }
-
-        _messagePanel!.Visible = true;
-        _showMessageButton!.Visible = false;
-        _cts?.Cancel();
-
-        if (_locked) return;
-        _cts = new CancellationTokenSource();
-        _ = HideMessageAsync(_cts.Token);
-    }
 }
-#nullable disable
