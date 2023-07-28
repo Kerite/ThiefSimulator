@@ -162,9 +162,17 @@ public partial class Server : Node
             Operation = operation
         };
         HouseOperationLog(peerId, playerId, houseId, operation);
+        var houseGridCoord = Utils.HouseCoordToGridCoord(GetHouseCoordFromHouseId(houseId));
         if (peerId > 1)
         {
             RpcId(peerId, nameof(HouseOperationSuccessCallBack), operationCode, GetHouseCoordFromHouseId(houseId));
+            if (houseId.Equals(""))
+            {
+                SendMessage(peerId, $"[color=green]Operation {Enum.GetName(operation)} committed[/color]");
+            } else
+            {
+                SendMessage(peerId, $"[color=green]Operation {Enum.GetName(operation)} at {houseGridCoord} committed[/color]");
+            }
         }
     }
 
@@ -822,7 +830,6 @@ public partial class Server : Node
         if (LevelData.CoordIndexToHouseId.ContainsKey(index) == false)
             throw new ArgumentOutOfRangeException(nameof(coord), coord, "There's no house there");
         var houseId = LevelData.CoordIndexToHouseId[index];
-        GD.Print($"{coord} => {index} ({houseId})");
         return houseId;
     }
 
