@@ -22,13 +22,14 @@ public static partial class InventoryReflection {
   static InventoryReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Cg9JbnZlbnRvcnkucHJvdG8iZwoJSW52ZW50b3J5EgwKBGtleXMYASABKA0S",
+          "Cg9JbnZlbnRvcnkucHJvdG8ibQoJSW52ZW50b3J5EgwKBGtleXMYASABKA0S",
           "DgoGbW9uZXlzGAIgASgNEhUKDXJlbWFpbmVkX3BlZWsYAyABKA0SEAoIaG91",
-          "c2VfaWQYBCABKAkSEwoLaG91c2VfaW5kZXgYBSABKARiBnByb3RvMw=="));
+          "c2VfaWQYBCABKAkSGQoRaG91c2VfY29vcmRfaW5kZXgYBSABKARiBnByb3Rv",
+          "Mw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::Inventory), global::Inventory.Parser, new[]{ "Keys", "Moneys", "RemainedPeek", "HouseId", "HouseIndex" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::Inventory), global::Inventory.Parser, new[]{ "Keys", "Moneys", "RemainedPeek", "HouseId", "HouseCoordIndex" }, null, null, null, null)
         }));
   }
   #endregion
@@ -73,7 +74,7 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     moneys_ = other.moneys_;
     remainedPeek_ = other.remainedPeek_;
     houseId_ = other.houseId_;
-    houseIndex_ = other.houseIndex_;
+    houseCoordIndex_ = other.houseCoordIndex_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -131,15 +132,15 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     }
   }
 
-  /// <summary>Field number for the "house_index" field.</summary>
-  public const int HouseIndexFieldNumber = 5;
-  private ulong houseIndex_;
+  /// <summary>Field number for the "house_coord_index" field.</summary>
+  public const int HouseCoordIndexFieldNumber = 5;
+  private ulong houseCoordIndex_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public ulong HouseIndex {
-    get { return houseIndex_; }
+  public ulong HouseCoordIndex {
+    get { return houseCoordIndex_; }
     set {
-      houseIndex_ = value;
+      houseCoordIndex_ = value;
     }
   }
 
@@ -162,7 +163,7 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     if (Moneys != other.Moneys) return false;
     if (RemainedPeek != other.RemainedPeek) return false;
     if (HouseId != other.HouseId) return false;
-    if (HouseIndex != other.HouseIndex) return false;
+    if (HouseCoordIndex != other.HouseCoordIndex) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -174,7 +175,7 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     if (Moneys != 0) hash ^= Moneys.GetHashCode();
     if (RemainedPeek != 0) hash ^= RemainedPeek.GetHashCode();
     if (HouseId.Length != 0) hash ^= HouseId.GetHashCode();
-    if (HouseIndex != 0UL) hash ^= HouseIndex.GetHashCode();
+    if (HouseCoordIndex != 0UL) hash ^= HouseCoordIndex.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -209,9 +210,9 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
       output.WriteRawTag(34);
       output.WriteString(HouseId);
     }
-    if (HouseIndex != 0UL) {
+    if (HouseCoordIndex != 0UL) {
       output.WriteRawTag(40);
-      output.WriteUInt64(HouseIndex);
+      output.WriteUInt64(HouseCoordIndex);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -239,9 +240,9 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
       output.WriteRawTag(34);
       output.WriteString(HouseId);
     }
-    if (HouseIndex != 0UL) {
+    if (HouseCoordIndex != 0UL) {
       output.WriteRawTag(40);
-      output.WriteUInt64(HouseIndex);
+      output.WriteUInt64(HouseCoordIndex);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -265,8 +266,8 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     if (HouseId.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(HouseId);
     }
-    if (HouseIndex != 0UL) {
-      size += 1 + pb::CodedOutputStream.ComputeUInt64Size(HouseIndex);
+    if (HouseCoordIndex != 0UL) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt64Size(HouseCoordIndex);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -292,8 +293,8 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
     if (other.HouseId.Length != 0) {
       HouseId = other.HouseId;
     }
-    if (other.HouseIndex != 0UL) {
-      HouseIndex = other.HouseIndex;
+    if (other.HouseCoordIndex != 0UL) {
+      HouseCoordIndex = other.HouseCoordIndex;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -327,7 +328,7 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
           break;
         }
         case 40: {
-          HouseIndex = input.ReadUInt64();
+          HouseCoordIndex = input.ReadUInt64();
           break;
         }
       }
@@ -362,7 +363,7 @@ public sealed partial class Inventory : pb::IMessage<Inventory>
           break;
         }
         case 40: {
-          HouseIndex = input.ReadUInt64();
+          HouseCoordIndex = input.ReadUInt64();
           break;
         }
       }

@@ -4,9 +4,11 @@ using System.Threading.Tasks;
 using Godot;
 using NewDemo.Models;
 using NewDemo.Scenes.Singletons;
+using NewDemo.Sources;
 
 namespace NewDemo.Scenes.HUDScene;
 
+#pragma warning disable IDE1006 // Naming Styles
 public partial class HudScene : Control
 {
     private Server? _server;
@@ -78,7 +80,7 @@ public partial class HudScene : Control
     {
         async Task HideMessageAsync(CancellationToken token)
         {
-            await Task.Delay(3000, token);
+            await Task.Delay(Configs.MessageDuration, token);
             _messagePanel!.Visible = false;
             _showMessageButton!.Visible = true;
         }
@@ -115,7 +117,6 @@ public partial class HudScene : Control
 
     public void _On_LockMessageHistoryButton_Toggled(bool buttonPressed)
     {
-        GD.Print($"Lock pressed {buttonPressed}");
         _locked = buttonPressed;
         if (_locked)
         {
@@ -123,3 +124,4 @@ public partial class HudScene : Control
         }
     }
 }
+#pragma warning restore IDE1006 // Naming Styles

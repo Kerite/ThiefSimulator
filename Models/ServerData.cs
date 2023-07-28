@@ -1,67 +1,96 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Godot;
-using NewDemo.Scripts;
+using NewDemo.Sources;
 
 namespace NewDemo.Models;
 
+/// <summary>
+/// 用于存储服务器的数据
+/// </summary>
 public class ServerData
 {
-    public const int InitialKeys = 20;
-    public const int InitialMoney = 100000;
-    public const int InitialHouseMoney = 5000;
-    public const int InitialPeekChance = 3;
-
-    private int _tempHouseIndex;
-
     /// <summary>
-    /// [Client &amp; Server] 地图信息
+    /// 地图信息
     /// </summary>
     public Level LevelData = new();
 
     /// <summary>
-    /// [Server] 回合是否锁定（结算中）
+    /// 回合是否锁定（结算中）
     /// </summary>
     public bool RoundLocked;
 
     /// <summary>
-    /// [Server] 玩家ID => 玩家当前回合的操作
+    /// 玩家ID => 玩家当前回合的操作
     /// </summary>
     public readonly Dictionary<string, PlayerOperation> PlayerOperation = new();
 
     /// <summary>
-    /// [Server] PeerId => （已登录的）玩家ID
+    /// PeerId => （已登录的）玩家 ID，如果 PeerId <![CDATA[<]]> 0，则为 Bot
     /// </summary>
     public readonly Dictionary<long, string> PeerIdToPlayerId = new();
 
     /// <summary>
-    /// [Server] 房子ID => 到房子信息
+    /// 房子ID => 到房子信息
     /// </summary>
     public readonly Dictionary<string, House> HouseDataDictionary = new();
 
     /// <summary>
-    /// [Server] 玩家ID => 玩家信息
+    /// 玩家ID => 玩家信息
     /// </summary>
     public readonly Dictionary<string, Inventory> PlayerDataDictionary = new();
 
-    public ServerData(Vector2I startCoord, Vector2I houseSize, int mapWidth, int mapHeight)
+    /// <summary>
+    /// 客户端ID => 玩家ID
+    /// </summary>
+    public readonly Dictionary<string, string> ClientIdToPlayerId = new();
+
+    public ServerData(Vector2I startCoord, Vector2I houseSize, int mapWidth, int mapHeight, bool withBots = false)
     {
+        long botPeerId = -1;
         LevelData.Round = 1;
-        LevelData.CoordsToHouseId.Clear();
+        LevelData.CoordIndexToHouseId.Clear();
 
         // Traverse all tiles and assign a random GUID to each house
-        foreach (var y in Enumerable.Range(0, mapHeight))
-        foreach (var x in Enumerable.Range(0, mapWidth))
-        {
-            // Assign a random GUID to a house as its id
-            var coordX = startCoord.X + x * houseSize.X;
-            var coordY = startCoord.Y + y * houseSize.Y;
-            var houseId = Guid.NewGuid()
-                .ToString();
-            GD.Print($"[Server] Created house {houseId} at {coordX}, {coordY}");
-            LevelData.CoordsToHouseId[Utils.CoordToIndex(coordX, coordY)] = houseId;
-        }
+        foreach (var gridCoordY in Enumerable.Range(0, Configs.MapSize.Y))
+            foreach (var gridCoordX in Enumerable.Range(0, Configs.MapSize.X))
+            {
+                // Assign a random GUID to a house as its id
+                var houseCoord = Utils.HouseGridCoordToCoord(gridCoordX, gridCoordY);
+                var houseCoordIndex = Utils.HouseCoordToCoordIndex(houseCoord);
+                var houseId = Guid.NewGuid().ToString();
+                LevelData.CoordIndexToHouseId[houseCoordIndex] = houseId;
+                if (withBots)
+                {
+                    var playerId = Guid.NewGuid().ToString();
+
+                    // 添加一所房子给新玩家
+                    HouseDataDictionary[houseId] = new House
+                    {
+                        Owner = playerId,
+                        HouseMoney = Configs.InitialHouseGolds
+                    };
+
+                    PeerIdToPlayerId[botPeerId] = playerId;
+                    PlayerDataDictionary[playerId] = new Inventory
+                    {
+                        Keys = Configs.InitialKeys,
+                        Moneys = Configs.InitialGolds,
+                        RemainedPeek = Configs.InitialPeekChance,
+                        HouseId = houseId,
+                        HouseCoordIndex = houseCoordIndex
+                    };
+
+                    GD.Print($"[Server] Created house {houseId} at {houseCoord}, Bot${-botPeerId}'s playerId: {playerId}");
+                    botPeerId--;
+                }
+                else
+                {
+                    GD.Print($"[Server] Created house {houseId} at {houseCoord}");
+                }
+            }
     }
 
     public long GetPeerId(string playerId)
@@ -82,48 +111,19 @@ public class ServerData
         return lostMoney;
     }
 
-    public void CreatePlayer(long peerId, string playerId)
+    /// <summary>
+    /// 找到第一个 Bot 的玩家 ID
+    /// </summary>
+    /// <returns></returns>
+    public Tuple<long, string> GetFirstBot()
     {
-        var reconnecting = false;
-        if (PeerIdToPlayerId.ContainsKey(peerId))
+        foreach (var (key, value) in PeerIdToPlayerId)
         {
-            GD.PrintErr($"[Server${peerId}] Already logged in");
-            return;
-        }
-
-        if (PeerIdToPlayerId.ContainsValue(playerId))
-        {
-            GD.Print($"[Server${peerId}] {playerId} reconnection");
-            reconnecting = true;
-        }
-
-        if (!reconnecting)
-        {
-            var (index, houseId) = LevelData.CoordsToHouseId.ElementAt(_tempHouseIndex);
-            _tempHouseIndex++;
-
-            // 添加一所房子给新玩家
-            HouseDataDictionary[houseId] = new House
+            if (key < 0)
             {
-                Owner = playerId,
-                HouseMoney = InitialHouseMoney
-            };
-
-            GD.Print($"[Server${peerId}] Assigned house {houseId} at {Utils.IndexToCoord(index)} to player {playerId}");
-
-            PeerIdToPlayerId[peerId] = playerId;
-            PlayerDataDictionary[playerId] = new Inventory
-            {
-                Keys = InitialKeys,
-                Moneys = InitialMoney,
-                RemainedPeek = InitialPeekChance,
-                HouseId = houseId,
-                HouseIndex = index
-            };
+                return Tuple.Create(key, value);
+            }
         }
-        else
-        {
-            GD.Print($"[Server${peerId}] Reconnected");
-        }
+        return Tuple.Create(0L, "");
     }
 }

@@ -58,7 +58,7 @@ public partial class ServerScene : Node
         _server!.FinishGame();
     }
 
-    public void AddLog(uint round, long peerId, string playerId, string operation, string detail)
+    public void AddLog(uint round, long peerId, string playerId, string operation, string detail, Vector2I targetHouseGridCoord)
     {
         _operationHistory!.AddChild(new Label
         {
@@ -102,6 +102,13 @@ public partial class ServerScene : Node
         };
         operationLabel.AddThemeColorOverride("font_color", Color.Color8(0, 100, 100));
         _operationHistory.AddChild(operationLabel);
+
+        _operationHistory.AddChild(new Label
+        {
+            Text = targetHouseGridCoord.ToString(),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        });
     }
 
     public void Save(string path)

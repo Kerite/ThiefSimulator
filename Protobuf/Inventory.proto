@@ -5,5 +5,5 @@ message Inventory {
     uint32 moneys = 2;
     uint32 remained_peek = 3;
     string house_id = 4;
-    uint64 house_index = 5;
+    uint64 house_coord_index = 5;
 }

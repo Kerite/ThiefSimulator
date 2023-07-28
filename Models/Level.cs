@@ -22,14 +22,14 @@ public static partial class LevelReflection {
   static LevelReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "CgtMZXZlbC5wcm90byKHAQoFTGV2ZWwSNwoSY29vcmRzX3RvX2hvdXNlX2lk",
-          "GAEgAygLMhsuTGV2ZWwuQ29vcmRzVG9Ib3VzZUlkRW50cnkSDQoFcm91bmQY",
-          "AiABKA0aNgoUQ29vcmRzVG9Ib3VzZUlkRW50cnkSCwoDa2V5GAEgASgEEg0K",
-          "BXZhbHVlGAIgASgJOgI4AWIGcHJvdG8z"));
+          "CgtMZXZlbC5wcm90byKUAQoFTGV2ZWwSQAoXY29vcmRfaW5kZXhfdG9faG91",
+          "c2VfaWQYASADKAsyHy5MZXZlbC5Db29yZEluZGV4VG9Ib3VzZUlkRW50cnkS",
+          "DQoFcm91bmQYAiABKA0aOgoYQ29vcmRJbmRleFRvSG91c2VJZEVudHJ5EgsK",
+          "A2tleRgBIAEoBBINCgV2YWx1ZRgCIAEoCToCOAFiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::Level), global::Level.Parser, new[]{ "CoordsToHouseId", "Round" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+          new pbr::GeneratedClrTypeInfo(typeof(global::Level), global::Level.Parser, new[]{ "CoordIndexToHouseId", "Round" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
         }));
   }
   #endregion
@@ -70,7 +70,7 @@ public sealed partial class Level : pb::IMessage<Level>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public Level(Level other) : this() {
-    coordsToHouseId_ = other.coordsToHouseId_.Clone();
+    coordIndexToHouseId_ = other.coordIndexToHouseId_.Clone();
     round_ = other.round_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
@@ -81,15 +81,15 @@ public sealed partial class Level : pb::IMessage<Level>
     return new Level(this);
   }
 
-  /// <summary>Field number for the "coords_to_house_id" field.</summary>
-  public const int CoordsToHouseIdFieldNumber = 1;
-  private static readonly pbc::MapField<ulong, string>.Codec _map_coordsToHouseId_codec
+  /// <summary>Field number for the "coord_index_to_house_id" field.</summary>
+  public const int CoordIndexToHouseIdFieldNumber = 1;
+  private static readonly pbc::MapField<ulong, string>.Codec _map_coordIndexToHouseId_codec
       = new pbc::MapField<ulong, string>.Codec(pb::FieldCodec.ForUInt64(8, 0UL), pb::FieldCodec.ForString(18, ""), 10);
-  private readonly pbc::MapField<ulong, string> coordsToHouseId_ = new pbc::MapField<ulong, string>();
+  private readonly pbc::MapField<ulong, string> coordIndexToHouseId_ = new pbc::MapField<ulong, string>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public pbc::MapField<ulong, string> CoordsToHouseId {
-    get { return coordsToHouseId_; }
+  public pbc::MapField<ulong, string> CoordIndexToHouseId {
+    get { return coordIndexToHouseId_; }
   }
 
   /// <summary>Field number for the "round" field.</summary>
@@ -119,7 +119,7 @@ public sealed partial class Level : pb::IMessage<Level>
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (!CoordsToHouseId.Equals(other.CoordsToHouseId)) return false;
+    if (!CoordIndexToHouseId.Equals(other.CoordIndexToHouseId)) return false;
     if (Round != other.Round) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
@@ -128,7 +128,7 @@ public sealed partial class Level : pb::IMessage<Level>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
-    hash ^= CoordsToHouseId.GetHashCode();
+    hash ^= CoordIndexToHouseId.GetHashCode();
     if (Round != 0) hash ^= Round.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -148,7 +148,7 @@ public sealed partial class Level : pb::IMessage<Level>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
-    coordsToHouseId_.WriteTo(output, _map_coordsToHouseId_codec);
+    coordIndexToHouseId_.WriteTo(output, _map_coordIndexToHouseId_codec);
     if (Round != 0) {
       output.WriteRawTag(16);
       output.WriteUInt32(Round);
@@ -163,7 +163,7 @@ public sealed partial class Level : pb::IMessage<Level>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-    coordsToHouseId_.WriteTo(ref output, _map_coordsToHouseId_codec);
+    coordIndexToHouseId_.WriteTo(ref output, _map_coordIndexToHouseId_codec);
     if (Round != 0) {
       output.WriteRawTag(16);
       output.WriteUInt32(Round);
@@ -178,7 +178,7 @@ public sealed partial class Level : pb::IMessage<Level>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
-    size += coordsToHouseId_.CalculateSize(_map_coordsToHouseId_codec);
+    size += coordIndexToHouseId_.CalculateSize(_map_coordIndexToHouseId_codec);
     if (Round != 0) {
       size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Round);
     }
@@ -194,7 +194,7 @@ public sealed partial class Level : pb::IMessage<Level>
     if (other == null) {
       return;
     }
-    coordsToHouseId_.MergeFrom(other.coordsToHouseId_);
+    coordIndexToHouseId_.MergeFrom(other.coordIndexToHouseId_);
     if (other.Round != 0) {
       Round = other.Round;
     }
@@ -214,7 +214,7 @@ public sealed partial class Level : pb::IMessage<Level>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          coordsToHouseId_.AddEntriesFrom(input, _map_coordsToHouseId_codec);
+          coordIndexToHouseId_.AddEntriesFrom(input, _map_coordIndexToHouseId_codec);
           break;
         }
         case 16: {
@@ -237,7 +237,7 @@ public sealed partial class Level : pb::IMessage<Level>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 10: {
-          coordsToHouseId_.AddEntriesFrom(ref input, _map_coordsToHouseId_codec);
+          coordIndexToHouseId_.AddEntriesFrom(ref input, _map_coordIndexToHouseId_codec);
           break;
         }
         case 16: {

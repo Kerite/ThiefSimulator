@@ -23,7 +23,7 @@ public partial class LevelScene : Node2D
         // Update Camera Position
         var vec = Input.GetVector("left", "right", "up", "down");
         if (vec is { X: 0, Y: 0 }) return;
-        
+
         var newPosition = _cameraCenter!.GlobalPosition + vec * MoveSpeed * (float)delta;
         newPosition.X = Math.Clamp(newPosition.X, 0, 1000);
         newPosition.Y = Math.Clamp(newPosition.Y, 0, 500);
@@ -38,7 +38,6 @@ public partial class LevelScene : Node2D
         _cameraCenter = GetNode<Node2D>("CameraCenter/Camera2D");
         _server = GetNode<Server>("/root/Server");
         _server.Multiplayer.ServerDisconnected += _On_Server_Disconnected;
-        _server.Multiplayer.ConnectedToServer += _On_Server_Connected;
         _interactMenu = GetNode<InteractMenu.InteractMenu>("InteractMenu");
         _interactMenu.MenuInteracted += _On_InteractMenu_Interacted;
     }
@@ -59,28 +58,35 @@ public partial class LevelScene : Node2D
 
     private void _On_InteractMenu_Interacted(InteractMenu.InteractMenu.EnumMenu menu)
     {
-        switch (menu)
+        try
         {
-            case InteractMenu.InteractMenu.EnumMenu.Steel:
+            switch (menu)
             {
-                if (_houseCoord.HasValue)
-                {
-                    _server!.HouseOperation((int)EnumPlayerOperation.Steel, _server.GetHouseId(_houseCoord.Value));
-                }
+                case InteractMenu.InteractMenu.EnumMenu.Steel:
+                    {
+                        if (_houseCoord.HasValue)
+                        {
+                            _server!.HouseOperation((int)EnumPlayerOperation.Steel, _server.GetHouseIdFromCoord(_houseCoord.Value));
+                        }
 
-                break;
-            }
-            case InteractMenu.InteractMenu.EnumMenu.Peek:
-            {
-                if (_houseCoord.HasValue)
-                {
-                    _server!.HouseOperation((int)EnumPlayerOperation.Peek, _server.GetHouseId(_houseCoord.Value));
-                }
+                        break;
+                    }
+                case InteractMenu.InteractMenu.EnumMenu.Peek:
+                    {
+                        if (_houseCoord.HasValue)
+                        {
+                            _server!.HouseOperation((int)EnumPlayerOperation.Peek, _server.GetHouseIdFromCoord(_houseCoord.Value));
+                        }
 
-                break;
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(menu), menu, null);
             }
-            default:
-                throw new ArgumentOutOfRangeException(nameof(menu), menu, null);
+        }
+        catch
+        {
+            _server!.EmitSignal(Server.SignalName.ServerMessageReceived, "[color=red]There's no house there[/color]");
         }
     }
 
@@ -90,11 +96,6 @@ public partial class LevelScene : Node2D
         _interactMenu!.Visible = true;
         _interactMenu!.Position = position;
         // GD.Print($"[Client] Moved interact menu to {position}");
-    }
-
-    public void _On_Server_Connected()
-    {
-        GetWindow().Title = $"[{_server!.ClientData.PlayerId}] @ {_server.ServerIp}:{_server.ServerPort}";
     }
 
     public void _On_Server_Disconnected()

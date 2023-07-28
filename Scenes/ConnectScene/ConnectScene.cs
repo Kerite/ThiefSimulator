@@ -18,7 +18,7 @@ public partial class ConnectScene : Control
         _server = GetNode<Server>("/root/Server");
         _server.ConnectedToServer += (ip, port) =>
         {
-            _server.Login(_server.ClientData.PlayerId, "keep this empty is ok for now");
+            _server.Login(_server.ClientData.ClientId, "keep this empty is ok for now");
         };
     }
 

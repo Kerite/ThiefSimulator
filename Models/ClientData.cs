@@ -9,7 +9,10 @@ public class ClientData
     /// </summary>
     public Level LevelData = new();
 
-    public string PlayerId { get; private set; } = Guid.NewGuid().ToString();
+    public string PlayerId { get; set; } = "";
 
-    public int HouseMoney = 0;
+    /// <summary>
+    /// 客户端ID，仅在登录时用到
+    /// </summary>
+    public string ClientId { get; } = Guid.NewGuid().ToString();
 }

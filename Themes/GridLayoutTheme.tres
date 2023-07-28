@@ -1,4 +1,6 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bqqwi7q2iuvne"]
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://bqqwi7q2iuvne"]
+
+[ext_resource type="FontFile" uid="uid://bwsh63r5ub0vf" path="res://Assets/Fonts/NotoSansCJK-Regular.ttc" id="1_e0vcw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j7kj2"]
 bg_color = Color(0.175781, 0.175781, 0.175781, 1)
@@ -13,4 +15,5 @@ expand_margin_bottom = 2.0
 
 [resource]
 Label/font_sizes/font_size = 14
+Label/fonts/font = ExtResource("1_e0vcw")
 Label/styles/normal = SubResource("StyleBoxFlat_j7kj2")

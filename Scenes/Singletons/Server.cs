@@ -4,16 +4,16 @@ using System.Linq;
 using Godot;
 using NewDemo.Models;
 using Google.Protobuf;
-using NewDemo.Scripts;
-using Utils = NewDemo.Scripts.Utils;
+using NewDemo.Sources;
+using Utils = NewDemo.Sources.Utils;
 
 namespace NewDemo.Scenes.Singletons;
 
+#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable IDE1006 // Naming Styles
 public partial class Server : Node
 {
     public const int Port = 11451;
-    public static readonly Vector2I StartCoord = new(21, 9);
-    public static readonly Vector2I HouseSize = new(4, 4);
 
     private ENetMultiplayerPeer _network = new();
 
@@ -72,6 +72,62 @@ public partial class Server : Node
 
     #region [RPC] House Operation
 
+    private bool CheckOperation(long peerId, string playerId, string houseId, EnumPlayerOperation operation, string secret = "test secret")
+    {
+        if (!ServerData.PeerIdToPlayerId.ContainsKey(peerId))
+        {
+            OperationFailed(peerId, operation, "Not logged in");
+            return false;
+        }
+        if (ServerData.RoundLocked)
+        {
+            OperationFailed(peerId, operation, "This round is locked");
+            return false;
+        }
+        if (peerId > 0)
+        {
+            if (!secret.Equals("test secret"))
+            {
+                OperationFailed(peerId, operation, "Unauthorized RPC Call");
+                return false;
+            }
+        }
+        if (operation != EnumPlayerOperation.StayAtHome)
+        {
+            if (operation == EnumPlayerOperation.Peek &&
+                ServerData.PlayerDataDictionary[playerId].RemainedPeek <= 0)
+            {
+                OperationFailed(peerId, operation, "You have no peek chance");
+                return false;
+            }
+
+            if (!ServerData.HouseDataDictionary.ContainsKey(houseId))
+            {
+                OperationFailed(peerId, operation, "This house has no owner");
+                return false;
+            }
+
+            if (playerId.Equals(ServerData.HouseDataDictionary[houseId].Owner))
+            {
+                OperationFailed(peerId, operation, "It's your house");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private void HouseOperationLog(long peerId, string playerId, string houseId, EnumPlayerOperation operation)
+    {
+        var operationName = Enum.GetName(operation) ?? "Unknown";
+        var operationCode = (int)operation;
+        GD.Print($"[Server${peerId}] Round#{Round} Operation committed: {operationName}");
+        EmitSignal(SignalName.UserOperation, peerId, operationCode, playerId, houseId);
+        var houseCoord = GetHouseCoordFromHouseId(houseId);
+        var houseGridCoord = Utils.HouseCoordToGridCoord(houseCoord);
+        var detail = $"Target house: {houseId} {houseCoord} at grid {houseGridCoord}";
+        LogOperation(peerId, playerId, operationName, detail, houseGridCoord);
+    }
+
     /// <summary>
     /// [客户端 -> 服务端] 提交当前回合的操作
     /// <example>HouseOperation()</example>
@@ -91,64 +147,25 @@ public partial class Server : Node
 
         var operation = (EnumPlayerOperation)operationCode;
         long peerId = Multiplayer.GetRemoteSenderId();
-        if (!ServerData.PeerIdToPlayerId.ContainsKey(peerId))
-        {
-            OperationFailed(peerId, operation, "Not logged in");
-            return;
-        }
 
         var playerId = ServerData.PeerIdToPlayerId[peerId];
-        var operationName = Enum.GetName(operation) ?? "Unknown";
         GD.Print($"[Server${peerId}] #{playerId}# Received HouseOperation RPC Call on {houseId}");
 
-        #region Some Checks
-
-        if (!secret.Equals("test secret"))
+        if (!CheckOperation(peerId, playerId, houseId, operation, secret))
         {
-            OperationFailed(peerId, operation, "Unauthorized RPC Call");
             return;
         }
-
-        if (ServerData.RoundLocked)
-        {
-            OperationFailed(peerId, operation, "This round is locked");
-            return;
-        }
-
-        if (operation != EnumPlayerOperation.StayAtHome)
-        {
-            if (operation == EnumPlayerOperation.Peek &&
-                ServerData.PlayerDataDictionary[playerId].RemainedPeek <= 0)
-            {
-                OperationFailed(peerId, operation, "You have no peek chance");
-                return;
-            }
-
-            if (!ServerData.HouseDataDictionary.ContainsKey(houseId))
-            {
-                OperationFailed(peerId, operation, "This house has no owner");
-                return;
-            }
-
-            if (playerId.Equals(ServerData.HouseDataDictionary[houseId].Owner))
-            {
-                OperationFailed(peerId, operation, "It's your house");
-                return;
-            }
-        }
-
-        #endregion
 
         ServerData.PlayerOperation[playerId] = new PlayerOperation
         {
             HouseId = houseId,
             Operation = operation
         };
-        GD.Print($"[Server${peerId}] Operation committed");
-        EmitSignal(SignalName.UserOperation, peerId, operationCode, playerId, houseId);
-        EmitSignal(SignalName.OperationLog, Round, peerId, playerId, operationName,
-            $"Target house: {houseId} {GetHouseCoord(houseId)}");
-        RpcId(peerId, nameof(HouseOperationSuccessCallBack), operationCode, GetHouseCoord(houseId));
+        HouseOperationLog(peerId, playerId, houseId, operation);
+        if (peerId > 1)
+        {
+            RpcId(peerId, nameof(HouseOperationSuccessCallBack), operationCode, GetHouseCoordFromHouseId(houseId));
+        }
     }
 
     [Rpc]
@@ -163,30 +180,68 @@ public partial class Server : Node
 
     /// <summary>
     /// [客户端 -> 服务端] 使用 playerId 和 playerSecret 模拟身份验证
+    /// <br/>
+    /// 客户端发送 ClientId 和 PlayerSecret，服务端验证后返回 PlayerId
+    /// <br/><br/>
+    /// 内部逻辑：首先判断是否已经登录（<see cref="ServerData.ClientIdToPlayerId"/> 中存在 clientId）
+    /// <br/>
+    /// 如果已经登录，则更新 <see cref="ServerData.PeerIdToPlayerId"/> 和 <see cref="ServerData.ClientIdToPlayerId"/>，否则，调用 <see cref="ServerData.CreateBot"/>
     /// </summary>
-    /// <param name="playerId">用于模拟钱包地址</param>
+    /// <param name="clientId">用于模拟钱包地址</param>
     /// <param name="playerSecret"></param>
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = false, TransferMode = MultiplayerPeer.TransferModeEnum.Reliable)]
-    public void Login(string playerId, string playerSecret)
+    public void Login(string clientId, string playerSecret)
     {
         if (!Multiplayer.IsServer())
         {
-            RpcId(1, nameof(Login), playerId, playerSecret);
+            RpcId(1, nameof(Login), clientId, playerSecret);
             return;
         }
 
         var peerId = Multiplayer.GetRemoteSenderId();
+        var botPeerId = 0L;
+        if (ServerData.ClientIdToPlayerId.TryGetValue(clientId, out var playerId))
+        {
+            GD.Print($"[Server${peerId}] Reconnecting");
+        }
+        else
+        {
+            GD.Print($"[Server${peerId}] New Player");
+            (botPeerId, playerId) = ServerData.GetFirstBot();
+        }
+        GD.Print($"[Server${peerId}] Client {clientId} logging in. Takes the control of Bot${-botPeerId} {playerId}");
 
-        ServerData.CreatePlayer(peerId, playerId);
+        ServerData.ClientIdToPlayerId[clientId] = playerId;
+
+        ServerData.PeerIdToPlayerId.Remove(botPeerId);
+        ServerData.PeerIdToPlayerId[peerId] = playerId;
 
         SendInventoryData(peerId, playerId);
         SendLevelData(peerId);
         EmitSignal(SignalName.UserLoginOrLogout, peerId, playerId, true);
+        RpcId(peerId, nameof(LoginReturn), playerId);
+
+        // 发送服务器消息到客户端
         SendMessage(peerId, "[color=green]Login Success[/color]");
         SendMessage(peerId, $"Welcome, [color=green]{playerId}[/color]");
-        var houseCoord = Utils.IndexToCoord(ServerData.PlayerDataDictionary[playerId].HouseIndex);
-        houseCoord =  (houseCoord - StartCoord) / HouseSize;
-        SendMessage(peerId, $"Your house is at [color=green]{houseCoord}[/color]");
+        var houseGridCoord = Utils.HouseCoordIndexToGridCoord(ServerData.PlayerDataDictionary[playerId].HouseCoordIndex);
+        SendMessage(peerId, $"Your house is at [color=green]{houseGridCoord}[/color]");
+    }
+
+    /// <summary>
+    /// [服务端 -> 客户端] 返回 PlayerId
+    /// </summary>
+    /// <param name="playerId"></param>
+    [Rpc]
+    public void LoginReturn(string playerId)
+    {
+        if (Multiplayer.IsServer())
+        {
+            return;
+        }
+        ClientData.PlayerId = playerId;
+        GetWindow().Title = $"[{ClientData.PlayerId}] @ {ServerIp}:{ServerPort}";
+        EmitSignal(SignalName.LoggedIn, playerId);
     }
 
     /// <summary>
@@ -216,6 +271,9 @@ public partial class Server : Node
 
     private void OperationFailed(long peerId, EnumPlayerOperation operation, string reason)
     {
+        if (peerId < 0)
+            return;
+
         var operationName = Enum.GetName(operation);
         GD.Print($"[Server${peerId}] Operation {operationName} Failed, reason: {reason}");
         SendMessage(peerId, $"[color=red]{operationName} failed, reason: {reason}[/color]");
@@ -228,11 +286,11 @@ public partial class Server : Node
     /// <param name="text">消息内容</param>
     private void SendMessage(long peerId, string text)
     {
-        GD.Print($"[Server${peerId}] Sending Message, content: {text}");
-        if (peerId != 0)
+        if (peerId > 0)
+        {
+            GD.Print($"[Server${peerId}] Sending Message, content: {text}");
             RpcId(peerId, nameof(ServerMessage), text);
-        else
-            GD.PrintErr("PeerId not found");
+        }
     }
 
     private void SendMessage(string playerId, string text)
@@ -273,6 +331,17 @@ public partial class Server : Node
         }
     }
 
+    private void LogOperation(long peerId, string playerId, string operationName, string detail, Vector2I houseGridCoord = default)
+    {
+        EmitSignal(SignalName.OperationLog, Round - 1, peerId, playerId, operationName, detail, houseGridCoord);
+    }
+
+    private void LogOperation(long peerId, string playerId, EnumPlayerOperation operation, string detail, Vector2I houseGridCoord = default)
+    {
+        var operationName = Enum.GetName(operation) ?? "";
+        EmitSignal(SignalName.OperationLog, Round - 1, peerId, playerId, operationName, detail, houseGridCoord);
+    }
+
     /// <summary>
     /// [服务端逻辑] 结束回合，由 ServerScene 手动触发
     /// </summary>
@@ -282,15 +351,67 @@ public partial class Server : Node
 
         GD.Print("Finish Round received");
         ServerData.RoundLocked = true;
+        ProcessBots();
         if (InnerFinishRound())
         {
             BroadcastMessage($"{Constants.ColorTagRoundFinished}Round {Round} Finished{Constants.ColorTagEnd}");
             Round++;
             Rpc(nameof(RoundFinished), Round);
-            EmitSignal(SignalName.OperationLog, Round - 1, 1, "Server", nameof(FinishRound), "");
+            LogOperation(1, "Server", nameof(FinishRound), "", Vector2I.Zero);
         }
 
         ServerData.RoundLocked = false;
+    }
+
+    /// <summary>
+    /// 给每个 Bot 分配操作
+    /// </summary>
+    private void ProcessBots()
+    {
+        GD.Print("[Server] Processing bots...");
+
+        using var rng = new RandomNumberGenerator();
+        var operations = Enum.GetValues(typeof(EnumPlayerOperation));
+
+        foreach (var (peerId, playerId) in ServerData.PeerIdToPlayerId)
+        {
+            if (peerId > 0) continue;
+
+
+            Inventory playerData = ServerData.PlayerDataDictionary[playerId];
+            var houseCoordIndex = playerData.HouseCoordIndex;
+            string targetHouseId = "";
+
+            var houseCoord = Utils.HouseCoordIndexToCoord(houseCoordIndex);
+            var houseGridCoord = Utils.HouseCoordToGridCoord(houseCoord);
+            var operation = (EnumPlayerOperation?)operations.GetValue(rng.RandiRange(1, operations.Length - 1))
+                ?? EnumPlayerOperation.StayAtHome;
+            string botHouseId = GetHouseIdFromCoord(houseCoord);
+
+            if (operation != EnumPlayerOperation.StayAtHome)
+            {
+                var targetHouseGridCoordX = rng.RandiRange(0, Configs.MapSize.X - 1);
+                var targetHouseGridCoordY = rng.RandiRange(0, Configs.MapSize.Y - 1);
+                while (targetHouseGridCoordX == houseGridCoord.X)
+                    targetHouseGridCoordX = rng.RandiRange(0, Configs.MapSize.X - 1);
+                while (targetHouseGridCoordY == houseGridCoord.Y)
+                    targetHouseGridCoordY = rng.RandiRange(0, Configs.MapSize.Y - 1);
+
+                targetHouseId = ServerData.LevelData
+                    .CoordIndexToHouseId[Utils.HouseGridCoordToCoordIndex(targetHouseGridCoordX, targetHouseGridCoordY)];
+            }
+
+            var totalMoney = playerData.Moneys + ServerData.HouseDataDictionary[botHouseId].HouseMoney;
+            ServerData.PlayerDataDictionary[playerId].Moneys = totalMoney / 2;
+            ServerData.HouseDataDictionary[botHouseId].HouseMoney = totalMoney / 2;
+
+            ServerData.PlayerOperation[playerId] = new PlayerOperation
+            {
+                HouseId = targetHouseId,
+                Operation = operation
+            };
+            HouseOperationLog(peerId, playerId, targetHouseId, operation);
+        }
     }
 
     /// <summary>
@@ -317,13 +438,18 @@ public partial class Server : Node
             GD.Print("[Server] 结算房子：", houseId, "中...");
             var owner = ServerData.HouseDataDictionary[houseId].Owner;
             var houseMoney = ServerData.HouseDataDictionary[houseId].HouseMoney;
-            var moneyToSteel = houseMoney / playerList.Count;
+            var moneyToSteel = houseMoney / playerList.Count / 2;
             foreach (var playerId in playerList)
             {
                 GD.Print("[Server] 玩家 ", playerId, "进入");
-                ServerData.PlayerDataDictionary[playerId].Moneys += (uint)moneyToSteel;
+                var thiefData = ServerData.PlayerDataDictionary[playerId];
+                var oldThiefMoney = thiefData.Moneys;
+
+                thiefData.Moneys += (uint)moneyToSteel;
+                ServerData.HouseDataDictionary[houseId].HouseMoney -= (uint)moneyToSteel;
+
                 SendMessage(playerId,
-                    $"{Constants.ColorGoldGot}You Stole {moneyToSteel} Golds.{Constants.ColorTagEnd}");
+                    $"{Constants.ColorGoldGot}You Stole {moneyToSteel} Golds ({oldThiefMoney} -> {thiefData.Moneys}).{Constants.ColorTagEnd}");
                 SendMessage(owner,
                     $"{Constants.ColorGoldLost}Someone Stole {moneyToSteel} Golds from your house.{Constants.ColorTagEnd}");
             }
@@ -332,8 +458,11 @@ public partial class Server : Node
         // 向 登录的Peer 发送消息
         foreach (var (peerId, playerId) in ServerData.PeerIdToPlayerId)
         {
+            var houseMoney = ServerData.HouseDataDictionary[ServerData.PlayerDataDictionary[playerId].HouseId]
+                .HouseMoney;
             SendLevelData(peerId);
             SendInventoryData(peerId, playerId);
+            SendMessage(peerId, $"[color=blue]Golds in your house: {houseMoney}[/color]");
         }
 
         ServerData.PlayerOperation.Clear();
@@ -376,13 +505,21 @@ public partial class Server : Node
                     else
                     {
                         // 目标主人在家
-                        var lostGolds = ServerData.Caught(playerId);
-                        ServerData.PlayerDataDictionary[targetOwnerId].Moneys += lostGolds;
+                        var thiefData = ServerData.PlayerDataDictionary[playerId];
+                        var ownerData = ServerData.PlayerDataDictionary[targetOwnerId];
+
+                        var oldThiefMoney = thiefData.Moneys;
+                        var oldOwnerMoney = ownerData.Moneys;
+
+                        var lostGolds = thiefData.Moneys / 2;
+
+                        ownerData.Moneys += lostGolds;
+                        thiefData.Moneys -= lostGolds;
 
                         SendMessage(peerId,
-                            $"{Constants.ColorGoldLost}You were caught, lost {lostGolds} Golds{Constants.ColorTagEnd}");
+                            $"{Constants.ColorGoldLost}You were caught, lost {lostGolds} Golds ({oldThiefMoney} -> {thiefData.Moneys}){Constants.ColorTagEnd}");
                         SendMessage(targetOwnerId,
-                            $"{Constants.ColorGoldGot}You caught a thief, got {lostGolds} Golds{Constants.ColorTagEnd}");
+                            $"{Constants.ColorGoldGot}You caught a thief, got {lostGolds} Golds ({oldOwnerMoney} -> {ownerData.Moneys}){Constants.ColorTagEnd}");
                     }
                 }
                 else if (operation.Operation == EnumPlayerOperation.Peek)
@@ -436,10 +573,7 @@ public partial class Server : Node
     /// <summary>
     /// 创建服务器
     /// </summary>
-    /// <param name="mapWidth">地图宽度</param>
-    /// <param name="mapHeight">地图高度</param>
-    /// <param name="port">监听的端口</param>
-    public void CreateServer(int mapWidth = 8, int mapHeight = 8, int port = Port)
+    public void CreateServer()
     {
         if (Initialized)
         {
@@ -447,10 +581,10 @@ public partial class Server : Node
             return;
         }
 
-        _network.CreateServer(port);
+        _network.CreateServer(Configs.Port);
 
         Multiplayer.MultiplayerPeer = _network;
-        _serverData = new ServerData(StartCoord, HouseSize, mapWidth, mapHeight);
+        _serverData = new ServerData(Configs.StartCoord, Configs.GridSize, Configs.MapSize.X, Configs.MapSize.Y, true);
 
         Initialized = true;
         GD.Print("[Server] Started");
@@ -522,7 +656,9 @@ public partial class Server : Node
             return;
         }
 
-        GD.Print($"[Server${peerId}] Sending Inventory data to");
+        if (peerId < 0) return;
+
+        GD.Print($"[Server${peerId}] Sending Inventory data");
         var inventory = ServerData.PlayerDataDictionary[playerId];
         var inventoryBytes = new byte[inventory.CalculateSize()];
         using (var stream = new CodedOutputStream(inventoryBytes))
@@ -584,6 +720,7 @@ public partial class Server : Node
             GD.PrintErr("[Client#{PlayerId}] can only be called on server side");
             return;
         }
+        if (peerId < 0) return;
 
         GD.Print($"[Server${peerId}] Sending Level data");
         var levelBytes = new byte[LevelData.CalculateSize()];
@@ -621,8 +758,10 @@ public partial class Server : Node
     public delegate void UserOperationEventHandler(long peerId, int operation, string playerId, string houseId);
 
     [Signal]
-    public delegate void OperationLogEventHandler(uint round, long peerId, string playerId, string operation,
-        string details);
+    public delegate void OperationLogEventHandler(uint round, long peerId, string playerId, string operation, string details, Vector2I houseGridCoord);
+
+    [Signal]
+    public delegate void LoggedInEventHandler(string playerId);
 
     #endregion
 
@@ -666,30 +805,38 @@ public partial class Server : Node
         }
 
         SendInventoryData(peerId, playerId);
-        var detail = $"Transfer {count} {(transferToHouse ? "to" : "from")} house at {GetHouseCoord(houseId)}";
-        EmitSignal(SignalName.OperationLog, Round, peerId, playerId, "TransferGolds", detail);
+        var detail = $"Transfer {count} {(transferToHouse ? "to" : "from")} house at {GetHouseCoordFromHouseId(houseId)}";
+        var houseGridCoord = Utils.HouseCoordToGridCoord(GetHouseCoordFromHouseId(houseId));
+        LogOperation(peerId, playerId, "TransferGolds", detail, houseGridCoord);
     }
 
     /// <summary>
-    /// 从坐标获取房屋 ID
+    /// 坐标 => 房屋ID
     /// </summary>
     /// <param name="coord">房屋坐标</param>
     /// <returns>房屋的ID</returns>
     /// <exception cref="ArgumentOutOfRangeException">当坐标X或Y小于0时抛出</exception>
-    public string GetHouseId(Vector2I coord)
+    public string GetHouseIdFromCoord(Vector2I coord)
     {
-        var index = Utils.CoordToIndex(coord);
-        var houseId = LevelData.CoordsToHouseId[index];
+        var index = Utils.HouseCoordToCoordIndex(coord);
+        if (LevelData.CoordIndexToHouseId.ContainsKey(index) == false)
+            throw new ArgumentOutOfRangeException(nameof(coord), coord, "There's no house there");
+        var houseId = LevelData.CoordIndexToHouseId[index];
         GD.Print($"{coord} => {index} ({houseId})");
         return houseId;
     }
 
-    public Vector2I GetHouseCoord(string houseId)
+    /// <summary>
+    /// 房屋ID => 坐标
+    /// </summary>
+    /// <param name="houseId">房屋ID</param>
+    /// <returns>房屋的坐标</returns>
+    public Vector2I GetHouseCoordFromHouseId(string houseId)
     {
-        var index = LevelData.CoordsToHouseId
+        var index = LevelData.CoordIndexToHouseId
             .FirstOrDefault(x => x.Value.Equals(houseId))
             .Key;
-        return Utils.IndexToCoord(index);
+        return Utils.HouseCoordIndexToCoord(index);
     }
 
     public override void _Ready()
@@ -726,3 +873,5 @@ public partial class Server : Node
         GD.Print($"[Server${peerId}] Disconnected.");
     }
 }
+#pragma warning restore CA1822 // Mark members as static
+#pragma warning restore IDE1006 // Naming Styles
