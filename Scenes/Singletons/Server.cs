@@ -169,7 +169,8 @@ public partial class Server : Node
             if (houseId.Equals(""))
             {
                 SendMessage(peerId, $"[color=green]Operation {Enum.GetName(operation)} committed[/color]");
-            } else
+            }
+            else
             {
                 SendMessage(peerId, $"[color=green]Operation {Enum.GetName(operation)} at {houseGridCoord} committed[/color]");
             }
@@ -321,17 +322,53 @@ public partial class Server : Node
 
     #endregion
 
-    #region [Methods] Game Progress
+    #region [Methods] Game Progress 游戏进度
+
+    public delegate void GameFinishedEventHandler(GameFinishedMessage message);
+
+    public event GameFinishedEventHandler? OnGameFinished;
 
     /// <summary>
     /// 结束游戏
     /// </summary>
-    public void FinishGame()
+    [Rpc(MultiplayerApi.RpcMode.Authority)]
+    public void RpcFinishGame(byte[]? bytes = null)
     {
+        if (!Multiplayer.IsServer())
+        {
+            var data = GameFinishedMessage.Parser.ParseFrom(bytes);
+            OnGameFinished?.Invoke(data);
+            return;
+        }
+
+        var rank = ServerData.PeerIdToPlayerId
+            .Select((element, _) =>
+            {
+                var (peerId, playerId) = element;
+                var inventory = ServerData.PlayerDataDictionary[playerId];
+                var houseId = inventory.HouseId;
+
+                return new GameFinishedPlayer
+                {
+                    Golds = inventory.Moneys,
+                    GoldsInHouse = ServerData.GetHouseGolds(houseId),
+                    Keys = inventory.Keys,
+                    PlayerId = playerId,
+                };
+            }).OrderBy(rank => rank.Golds + rank.GoldsInHouse).ToList();
+
+        var message = new GameFinishedMessage
+        {
+            RoundCount = Round,
+            Rank = { rank }
+        };
+        OnGameFinished?.Invoke(message);
+
+        Rpc(nameof(RpcFinishGame), message.ToByteArray());
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
-    public void RoundFinished(uint newRound)
+    public void RpcRoundFinished(uint newRound)
     {
         if (!Multiplayer.IsServer())
         {
@@ -359,16 +396,33 @@ public partial class Server : Node
 
         GD.Print("Finish Round received");
         ServerData.RoundLocked = true;
+
+        foreach (var (peerId, playerId) in ServerData.PeerIdToPlayerId)
+        {
+            if (peerId < 0) continue;
+            if (ServerData.PlayerOperation.ContainsKey(playerId)) continue;
+
+            GD.PrintErr("[Server] Not all player is ready");
+            OS.Alert("Not all player is ready", "Not Ready");
+            ServerData.RoundLocked = false;
+            return;
+        }
+
         ProcessBots();
         if (InnerFinishRound())
         {
             BroadcastMessage($"{Constants.ColorTagRoundFinished}Round {Round} Finished{Constants.ColorTagEnd}");
             Round++;
-            Rpc(nameof(RoundFinished), Round);
+            Rpc(nameof(RpcRoundFinished), Round);
             LogOperation(1, "Server", nameof(FinishRound), "", Vector2I.Zero);
         }
 
         ServerData.RoundLocked = false;
+
+        if (Round == Configs.ServerConfig.FinishRounds)
+        {
+
+        }
     }
 
     /// <summary>
@@ -385,7 +439,6 @@ public partial class Server : Node
         {
             if (peerId > 0) continue;
 
-
             Inventory playerData = ServerData.PlayerDataDictionary[playerId];
             var houseCoordIndex = playerData.HouseCoordIndex;
             string targetHouseId = "";
@@ -394,6 +447,10 @@ public partial class Server : Node
             var houseGridCoord = Utils.HouseCoordToGridCoord(houseCoord);
             var operation = (EnumPlayerOperation?)operations.GetValue(rng.RandiRange(1, operations.Length - 1))
                 ?? EnumPlayerOperation.StayAtHome;
+            if (_serverData!.PlayerDataDictionary[playerId].Moneys > Configs.ServerConfig.BotsStaysAtHomeThreshold)
+            {
+                operation = EnumPlayerOperation.StayAtHome;
+            }
             string botHouseId = GetHouseIdFromCoord(houseCoord);
 
             if (operation != EnumPlayerOperation.StayAtHome)
@@ -428,15 +485,6 @@ public partial class Server : Node
     /// <returns>是否继续下一回合</returns>
     private bool InnerFinishRound()
     {
-        foreach (var (_, playerId) in ServerData.PeerIdToPlayerId)
-        {
-            if (ServerData.PlayerOperation.ContainsKey(playerId)) continue;
-
-            GD.PrintErr("[Server] Not all player is ready");
-            OS.Alert("Not all player is ready", "Not Ready");
-            return false;
-        }
-
         // 获取概览
         var houseIdToPlayerIdEntered = InnerFinishRound_Summary();
 
@@ -536,11 +584,11 @@ public partial class Server : Node
                     {
                         // 目标主人不在家
                         houseIdToPlayersEntered.GetOrCreate(targetHouseId).Add(playerId);
-                        SendMessage(peerId, $"{Constants.ColorPeekResult}Peek result: target is not at home[/color]");
+                        SendMessage(peerId, $"{Constants.ColorPeekResult}Peek result: target is not at home.[/color][color=green] Moneys in that house: {_serverData!.GetHouseGolds(targetHouseId)}[/color]");
                     }
                     else
                     {
-                        SendMessage(peerId, $"{Constants.ColorPeekResult}Peek result: target is at home[/color]");
+                        SendMessage(peerId, $"{Constants.ColorPeekResult}Peek result: target is at home.[/color][color=green] Moneys in that house: {_serverData!.GetHouseGolds(targetHouseId)}[/color]");
                     }
 
                     ServerData.PlayerDataDictionary[playerId].RemainedPeek--;

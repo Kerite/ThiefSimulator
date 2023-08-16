@@ -23,26 +23,14 @@ public static class Configs
     public static Vector2I MapSize = new(4, 4);
 
     #region Server Configs
-    public static int HouseMoney = 0;
-
-    /// <summary>
-    /// 初始的钥匙数量
-    /// </summary>
-    public static uint InitialKeys = 20;
-
-    /// <summary>
-    /// 初始的金钱数量
-    /// </summary>
-    public static uint InitialGolds = 100000;
-
-    /// <summary>
-    /// 初始的房屋金钱
-    /// </summary>
-    public static uint InitialHouseGolds = 5000;
-
-    /// <summary>
-    /// 初始的 Peek 次数
-    /// </summary>
-    public static uint InitialPeekChance = 3;
+    public static readonly ServerConfigModel ServerConfig = new()
+    {
+        FinishRounds = 10,
+        InitialGolds = 100_000,
+        InitialHouseGolds = 5_000,
+        InitialPeekChance = 3,
+        InitialKeys = 10,
+        BotsStaysAtHomeThreshold = 120_000
+    };
     #endregion
 }

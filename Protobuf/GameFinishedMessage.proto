@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+message GameFinishedPlayer {
+    string player_id = 1;
+    uint32 keys = 2;
+    uint32 golds = 3;
+    uint32 golds_in_house = 4;
+}
+
+message GameFinishedMessage {
+    uint32 round_count = 1;
+    repeated GameFinishedPlayer rank = 2;
+}

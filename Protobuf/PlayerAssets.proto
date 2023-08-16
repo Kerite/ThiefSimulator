@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-message Inventory {
+message PlayerAssets {
     uint32 keys = 1;
     uint32 moneys = 2;
     uint32 remained_peek = 3;

@@ -1,3 +1,3 @@
 @echo off
-protoc --csharp_out=../Models Inventory.proto House.proto Level.proto
+protoc --csharp_out=../Models ./*.proto
 pause

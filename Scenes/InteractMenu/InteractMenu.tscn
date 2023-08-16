@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bu5b0xt6lgpa8"]
+[gd_scene load_steps=5 format=3 uid="uid://bu5b0xt6lgpa8"]
 
 [ext_resource type="Script" path="res://Scenes/InteractMenu/InteractMenu.cs" id="1_kxeca"]
 [ext_resource type="Texture2D" uid="uid://deweyxsf71kfw" path="res://Assets/Icons/Kick.png" id="2_hh8cj"]
 [ext_resource type="Texture2D" uid="uid://beyqy071jquqs" path="res://Assets/Icons/Peek.png" id="2_skjtr"]
+[ext_resource type="Theme" uid="uid://d1m7hrhxuyxn5" path="res://Themes/NormalTheme.tres" id="3_dbtwj"]
 
 [node name="InteractMenu" type="Node2D"]
 script = ExtResource("1_kxeca")
@@ -40,5 +41,6 @@ layout_mode = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_default_cursor_shape = 2
+theme = ExtResource("3_dbtwj")
 icon = ExtResource("2_skjtr")
 expand_icon = true

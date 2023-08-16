@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+message ServerConfigModel {
+    uint32 initial_keys = 1;
+    uint32 initial_golds = 2;
+    uint32 initial_house_golds = 3;
+    uint32 initial_peek_chance = 4;
+    uint32 finish_rounds = 5;
+    uint32 bots_stays_at_home_threshold = 6;
+}

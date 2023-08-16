@@ -7,8 +7,8 @@ namespace NewDemo.Sources;
 
 public static class Utils
 {
-    public const uint BasicRent = 100;
-    public const uint KRent = 100;
+    public const uint BasicRent = 1000;
+    public const uint KRent = 1000;
 
     /// <summary>
     /// 计算当前回合的租金

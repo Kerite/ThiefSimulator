@@ -2,6 +2,7 @@ using System;
 using Godot;
 using NewDemo.Models;
 using NewDemo.Scenes.Singletons;
+using NewDemo.Sources;
 
 namespace NewDemo.Scenes.LevelScene;
 
@@ -15,6 +16,7 @@ public partial class LevelScene : Node2D
     private WorldMap? _groundTileMap;
     private InteractMenu.InteractMenu? _interactMenu;
     private Server? _server;
+    private Node2D? _houseIndicator;
 
     private Vector2I? _houseCoord;
 
@@ -38,8 +40,10 @@ public partial class LevelScene : Node2D
         _cameraCenter = GetNode<Node2D>("CameraCenter/Camera2D");
         _server = GetNode<Server>("/root/Server");
         _server.Multiplayer.ServerDisconnected += _On_Server_Disconnected;
+        _server.ReceivedInventoryData += _On_Server_ReceivedInventoryData;
         _interactMenu = GetNode<InteractMenu.InteractMenu>("InteractMenu");
         _interactMenu.MenuInteracted += _On_InteractMenu_Interacted;
+        _houseIndicator = GetNode<Node2D>("HouseIndicator");
     }
 
     private void _On_TileMap_Interacted(bool show, Vector2I tileCoord)
@@ -102,5 +106,15 @@ public partial class LevelScene : Node2D
     {
         GetTree().ChangeSceneToFile(ConnectScene.ConnectScene.ScenePath);
         GetWindow().Title = "No connection";
+    }
+
+    private void _On_Server_ReceivedInventoryData(Inventory inventoryData)
+    {
+        var houseCoordIndex = inventoryData.HouseCoordIndex;
+        var houseCoord = Utils.HouseCoordIndexToCoord(houseCoordIndex);
+        var local = _groundTileMap!.MapToLocal(houseCoord);
+
+        GD.Print($"Indicator move to {local}");
+        _houseIndicator!.Position = local;
     }
 }

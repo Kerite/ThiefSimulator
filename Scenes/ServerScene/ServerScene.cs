@@ -55,7 +55,7 @@ public partial class ServerScene : Node
 
     public void _On_FinishGameButton_Pressed()
     {
-        _server!.FinishGame();
+        _server!.RpcFinishGame();
     }
 
     public void AddLog(uint round, long peerId, string playerId, string operation, string detail, Vector2I targetHouseGridCoord)

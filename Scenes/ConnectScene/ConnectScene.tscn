@@ -57,6 +57,6 @@ virtual_keyboard_type = 2
 [node name="ConnectButton" type="Button" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
 mouse_default_cursor_shape = 2
-text = "Connect"
+text = "Join"
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/ConnectButton" to="." method="Connect"]

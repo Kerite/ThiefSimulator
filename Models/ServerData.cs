@@ -70,15 +70,15 @@ public class ServerData
                     HouseDataDictionary[houseId] = new House
                     {
                         Owner = playerId,
-                        HouseMoney = Configs.InitialHouseGolds
+                        HouseMoney = Configs.ServerConfig.InitialHouseGolds
                     };
 
                     PeerIdToPlayerId[botPeerId] = playerId;
                     PlayerDataDictionary[playerId] = new Inventory
                     {
-                        Keys = Configs.InitialKeys,
-                        Moneys = Configs.InitialGolds,
-                        RemainedPeek = Configs.InitialPeekChance,
+                        Keys = Configs.ServerConfig.InitialKeys,
+                        Moneys = Configs.ServerConfig.InitialGolds,
+                        RemainedPeek = Configs.ServerConfig.InitialPeekChance,
                         HouseId = houseId,
                         HouseCoordIndex = houseCoordIndex
                     };
@@ -125,5 +125,10 @@ public class ServerData
             }
         }
         return Tuple.Create(0L, "");
+    }
+
+    public uint GetHouseGolds(string houseId)
+    {
+        return HouseDataDictionary[houseId].HouseMoney;
     }
 }
